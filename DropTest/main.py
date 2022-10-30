@@ -16,7 +16,7 @@ def main():
 
     i = 0
     while altitude > 0:
-        print('telemetry: ', round(altitude, 0), round(throttle, 3))
+        print('telemetry >>> ', round(altitude, 0), round(throttle, 3))
         sleep(mainEnvState.get_timestep())
         mainComputer.update_telemetry()
         mainComputer.control_throttle()
