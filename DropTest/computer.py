@@ -22,7 +22,7 @@ class Computer:
         print('computer >>> ', round(target_acceleration, 3))
         if self.altitudes[0] > 3000:
             pass
-        elif self.altitudes[0] < 1:
+        elif self.altitudes[0] < 0.5:
             self.computerEnvState.update_throttle(-1)
         elif target_acceleration > acceleration_estimate:
             self.computerEnvState.update_throttle(.002)
