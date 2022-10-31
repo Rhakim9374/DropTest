@@ -3,11 +3,12 @@ import numpy as np
 from envstate import EnvState
 
 class Computer:
-    def __init__(self, mainEnvState):
+    def __init__(self, mainEnvState, target=0):
         self.computerEnvState = mainEnvState
         self.altitudes = np.zeros(10)
         self.throttles = np.zeros(10)
         self.TIMESTEP = self.computerEnvState.get_timestep()
+        self.TARGET_ALTITUDE = target
 
     def update_telemetry(self):
         self.altitudes = np.roll(self.altitudes, 1)
@@ -19,7 +20,6 @@ class Computer:
         old_velocity_estimate = (self.altitudes[5] - self.altitudes[9]) / (self.TIMESTEP * 4)
         acceleration_estimate = (velocity_estimate - old_velocity_estimate) / (self.TIMESTEP * 5)
         target_acceleration =  -(np.abs(velocity_estimate) * velocity_estimate) / (2*self.altitudes[0])
-        print('computer >>> ', round(target_acceleration, 3))
         if self.altitudes[0] > 3000:
             pass
         elif self.altitudes[0] < 0.5:

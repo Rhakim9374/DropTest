@@ -4,19 +4,25 @@ import numpy as np
 from time import sleep
 from envstate import EnvState
 from computer import Computer
+from computerPID import ComputerPID
+from networkComputer import NetworkComputer
 
 def main():
     print('>>> start >>>')
-    mainEnvState = EnvState()
-    mainComputer = Computer(mainEnvState)
+    mainEnvState = EnvState(500)
+    # Choose Computer ----------------
+    #mainComputer = Computer(mainEnvState)
+    #mainComputer = ComputerPID(mainEnvState, 1)
+    mainComputer = NetworkComputer(mainEnvState, 1)
+    # --------------------------------
     altitude, throttle = mainEnvState.get_telemetry()
     altitudes = []
     throttles = []
     steps = []
 
     i = 0
-    while altitude > 0:
-        print('telemetry >>> ', round(altitude, 0), round(throttle, 3))
+    while (altitude > 0):
+        print('telemetry >>> ', round(altitude, 0))
         sleep(mainEnvState.get_timestep())
         mainComputer.update_telemetry()
         mainComputer.control_throttle()

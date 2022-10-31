@@ -2,12 +2,12 @@
 import numpy as np
 
 class EnvState:
-    def __init__(self):
+    def __init__(self, altitude=5000):
         self.TIMESTEP = 0.01
         self.GRAVITY = -9.81
         self.MAX_THRUST = 100
         self.MASS = 5
-        self.altitude = 5000
+        self.altitude = altitude
         self.velocity = -1
         self.throttle = 0.1
     
@@ -24,6 +24,7 @@ class EnvState:
             self.throttle = 1
         if self.throttle < 0:
             self.throttle = 0
+        print('throttle >>> >>> ', round(self.throttle, 3))
 
     def get_telemetry(self):
         return self.altitude, self.throttle
