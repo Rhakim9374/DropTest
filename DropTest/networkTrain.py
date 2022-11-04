@@ -130,14 +130,14 @@ print('initial predict ', network.predict(np.array([np.ones(input_size)])))
 generational_costs = []
 
 for c in range(num_competitors):
-    start = random.uniform(20, 60)
-    end = random.uniform(20, 60)
-    avg_initial = np.random.normal(0, scale=0.2)
+    start = random.uniform(20, 80)
+    end = random.uniform(20, 80)
+    avg_initial = np.random.normal(0, scale=0.1)
     spread_initial = np.random.uniform(0.2, 0.4)
     matrix[c, :] = np.random.normal(avg_initial, scale=spread_initial, size=array_length)
     set_neurons_from_competitor(matrix, c)
     final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end)
-    values[c] = final_vel**2 + final_dist**2 + 0.1*steps
+    values[c] = final_vel**2 + final_dist**4 + 0.1*steps
     print('Competitor ', c+1, ' Cost: ', values[c])
     sleep(5)
 generational_costs.append(round(np.min(values), 2))
@@ -157,7 +157,7 @@ while (g < numruns):
             start = random.uniform(20, 60)
             end = random.uniform(20, 60)
             final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end)
-            acc[trial] = final_vel**2 + final_dist**2 + 0.1*steps
+            acc[trial] = final_vel**2 + final_dist**4 + 0.1*steps
         values[c] = np.mean(acc)
         print('Competitor ', c+1, ' Cost: ', values[c])
         sleep(20)
