@@ -24,7 +24,6 @@ class EnvState:
             self.throttle = 1
         if self.throttle < 0:
             self.throttle = 0
-        print('throttle >>> >>> ', round(self.throttle, 3))
 
     def get_telemetry(self):
         return self.altitude, self.throttle
