@@ -3,13 +3,13 @@ import numpy as np
 
 class EnvState:
     def __init__(self, altitude=5000):
-        self.TIMESTEP = 0.01
+        self.TIMESTEP = 0.2
         self.GRAVITY = -9.81
         self.MAX_THRUST = 100
         self.MASS = 5
         self.altitude = altitude
-        self.velocity = -1
-        self.throttle = 0.1
+        self.velocity = np.random.uniform(-10, 10)
+        self.throttle = 0.5
     
     def update_state(self):
         self.altitude += self.velocity*self.TIMESTEP

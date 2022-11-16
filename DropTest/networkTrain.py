@@ -110,6 +110,9 @@ def mutate(children,prob_mutation,max_mutation):
         choices=np.random.choice(np.arange(0, length), size=int(prob_mutation*length))
         for c in choices:
             combo[c]+= np.random.uniform(-max_mutation, max_mutation)
+        if 0.05 > np.random.uniform(0, 1):
+            choice = np.random.choice(np.arange(0, length), size=1)
+            combo[choice] = np.random.uniform(-1, 1)
     return temp
     
 
@@ -117,11 +120,11 @@ def mutate(children,prob_mutation,max_mutation):
 # ------------------------------------------------
 
 # initialize genetic algorithm
-num_competitors = 32 # must be even (64)
-numruns = 10 # number of generations with constant drop (10)
+num_competitors = 12 # must be even (12)
+numruns = 100 # number of generations with constant drop (100)
 index_to_consider = 0 # must be even?
-prob_mutation = 0.2  # Percentage of nodes to get changed per generational mutation
-max_mutation = 0.2  # Max introduced change 1
+prob_mutation = 0.05  # Percentage of nodes to get changed per generational mutation
+max_mutation = 0.05  # Max introduced change
 matrix = np.zeros((num_competitors, array_length))
 values = np.zeros(num_competitors)
 
@@ -130,20 +133,19 @@ print('initial predict ', network.predict(np.array([np.ones(input_size)])))
 generational_costs = []
 
 for c in range(num_competitors):
-    start = random.uniform(20, 80)
-    end = random.uniform(20, 80)
+    start = random.uniform(50, 400)
+    end = random.uniform(50, 400)
     avg_initial = np.random.normal(0, scale=0.1)
     spread_initial = np.random.uniform(0.2, 0.4)
     matrix[c, :] = np.random.normal(avg_initial, scale=spread_initial, size=array_length)
     set_neurons_from_competitor(matrix, c)
-    final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end)
+    final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True)
     values[c] = final_vel**2 + final_dist**4 + 0.1*steps
     print('Competitor ', c+1, ' Cost: ', values[c])
-    sleep(5)
+    sleep(2)
 generational_costs.append(round(np.min(values), 2))
 matrix = crossover(matrix, values, index_to_consider=0)
 matrix = mutate(matrix, prob_mutation=prob_mutation, max_mutation=max_mutation)
-sleep(50)
 
 g = 0
 while (g < numruns):
@@ -152,27 +154,28 @@ while (g < numruns):
     sleep(20)
     for c in range(num_competitors):
         set_neurons_from_competitor(matrix, c)
-        acc = np.zeros(5)
+        acc = np.zeros(10)
         for trial in range(len(acc)):
-            start = random.uniform(20, 60)
-            end = random.uniform(20, 60)
-            final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end)
+            start = random.uniform(20, 200)
+            end = random.uniform(20, 200)
+            final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True)
             acc[trial] = final_vel**2 + final_dist**4 + 0.1*steps
         values[c] = np.mean(acc)
         print('Competitor ', c+1, ' Cost: ', values[c])
-        sleep(20)
+        sleep(2)
     generational_costs.append(round(np.min(values), 2))
     matrix = crossover(matrix, values, index_to_consider=0)
     matrix = mutate(matrix, prob_mutation=prob_mutation, max_mutation=max_mutation/(g+1))
-    sleep(20)
     g+=1
 
 print('Values for final generation: ', values)
 print('Min cost final generation: ', generational_costs)
 
-network.get_model().save('saved_model/my_model')
-loaded_model = tf.keras.models.load_model('saved_model/my_model')
-new_network = Network(input_size, layer_sizes=layer_sizes, model=loaded_model)
+mean_weights = np.mean(matrix, axis=0)
+np.save('model_weights.npy', mean_weights)
+loaded_weights_check = np.load('model_weights.npy')
+
+print('Sim Complete')
 
 
 

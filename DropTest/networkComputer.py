@@ -22,7 +22,6 @@ class NetworkComputer:
         self.altitudes[0], self.throttles[0] = self.computerEnvState.get_telemetry()
 
     def control_throttle(self, p2=0.2, d2=0.00001):
-        #input = np.concatenate(((self.altitudes-self.TARGET_ALTITUDE), self.throttles))
         velocity = (self.altitudes[-4] - self.altitudes[-1]) / 3*self.TIMESTEP
         input = np.zeros(2)
         input[0] = self.altitudes[0]
