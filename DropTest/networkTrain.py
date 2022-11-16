@@ -7,7 +7,7 @@ from main import main
 
 # initialize neural network
 input_size = 2 # inputs size
-layer_sizes = [33, 11, 1] # must be 3 layers including output layer
+layer_sizes = [33, 33, 1] # must be 3 layers including output layer
 rescaling_factor = 1./1 # based on altitude diff
 network = Network(input_size, layer_sizes=layer_sizes, rescaling_factor=rescaling_factor)
 
@@ -120,7 +120,7 @@ def mutate(children,prob_mutation,max_mutation):
 # ------------------------------------------------
 
 # initialize genetic algorithm
-num_competitors = 12 # must be even (12)
+num_competitors = 10 # must be even (10)
 numruns = 100 # number of generations with constant drop (100)
 index_to_consider = 0 # must be even?
 prob_mutation = 0.05  # Percentage of nodes to get changed per generational mutation
@@ -133,8 +133,8 @@ print('initial predict ', network.predict(np.array([np.ones(input_size)])))
 generational_costs = []
 
 for c in range(num_competitors):
-    start = random.uniform(50, 400)
-    end = random.uniform(50, 400)
+    start = random.uniform(50, 250)
+    end = random.uniform(50, 250)
     avg_initial = np.random.normal(0, scale=0.1)
     spread_initial = np.random.uniform(0.2, 0.4)
     matrix[c, :] = np.random.normal(avg_initial, scale=spread_initial, size=array_length)
@@ -156,8 +156,8 @@ while (g < numruns):
         set_neurons_from_competitor(matrix, c)
         acc = np.zeros(10)
         for trial in range(len(acc)):
-            start = random.uniform(20, 200)
-            end = random.uniform(20, 200)
+            start = random.uniform(50, 250)
+            end = random.uniform(50, 250)
             final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True)
             acc[trial] = final_vel**2 + final_dist**4 + 0.1*steps
         values[c] = np.mean(acc)
@@ -165,7 +165,7 @@ while (g < numruns):
         sleep(2)
     generational_costs.append(round(np.min(values), 2))
     matrix = crossover(matrix, values, index_to_consider=0)
-    matrix = mutate(matrix, prob_mutation=prob_mutation, max_mutation=max_mutation/(g+1))
+    matrix = mutate(matrix, prob_mutation=prob_mutation, max_mutation=max_mutation/(np.sqrt(g+1)))
     g+=1
 
 print('Values for final generation: ', values)

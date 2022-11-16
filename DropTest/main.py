@@ -27,9 +27,9 @@ def main(network, starting_altitude=100, target_altitude=0, training=False):
     steps = []
 
     i = 0
-    while (altitude > 0 and len(steps)<=400):
+    while (altitude > 0 and len(steps)<=200):
         if training==True:
-            sleep(.0005)
+            sleep(.001)
         else:
             sleep(mainEnvState.get_timestep())
         mainComputer.update_telemetry()
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     # initialize neural network variables
     input_size = 2 # inputs size
-    layer_sizes = [33, 11, 1] # must be 3 layers including output layer
+    layer_sizes = [33, 33, 1] # must be 3 layers including output layer
     rescaling_factor = 1./1 # based on altitude diff
 
     # layer sizes

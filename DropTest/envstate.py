@@ -3,7 +3,7 @@ import numpy as np
 
 class EnvState:
     def __init__(self, altitude=5000):
-        self.TIMESTEP = 0.2
+        self.TIMESTEP = 0.1
         self.GRAVITY = -9.81
         self.MAX_THRUST = 100
         self.MASS = 5
