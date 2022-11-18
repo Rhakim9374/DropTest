@@ -7,7 +7,7 @@ from main import main
 
 # initialize neural network
 input_size = 2 # inputs size
-layer_sizes = [33, 33, 1] # must be 3 layers including output layer
+layer_sizes = [33, 11, 1] # must be 3 layers including output layer
 rescaling_factor = 1./1 # based on altitude diff
 network = Network(input_size, layer_sizes=layer_sizes, rescaling_factor=rescaling_factor)
 
@@ -59,11 +59,11 @@ def set_neurons_from_competitor(matrix, c):
 
 def choose_parents(matrix, values):
     print('CP values: ', values)
-    values = values**2
+    values = values + .01
     worst=max(values)
     best=min(values)
     indexofmin=np.argmin(values)
-    values[indexofmin]+=0.01
+    values[indexofmin]+=0.5
     likelihoods= worst/values
     print('CP likelihoods: ', likelihoods)
     length=len(matrix[:, 0])
@@ -110,7 +110,7 @@ def mutate(children,prob_mutation,max_mutation):
         choices=np.random.choice(np.arange(0, length), size=int(prob_mutation*length))
         for c in choices:
             combo[c]+= np.random.uniform(-max_mutation, max_mutation)
-        if 0.05 > np.random.uniform(0, 1):
+        if 0.01 > np.random.uniform(0, 1):
             choice = np.random.choice(np.arange(0, length), size=1)
             combo[choice] = np.random.uniform(-1, 1)
     return temp
@@ -120,23 +120,25 @@ def mutate(children,prob_mutation,max_mutation):
 # ------------------------------------------------
 
 # initialize genetic algorithm
-num_competitors = 10 # must be even (10)
+initial_num_competitors = 50 # must be even (50)
+num_competitors = 20 # must be even (20)
 numruns = 100 # number of generations with constant drop (100)
 index_to_consider = 0 # must be even?
 prob_mutation = 0.05  # Percentage of nodes to get changed per generational mutation
 max_mutation = 0.05  # Max introduced change
-matrix = np.zeros((num_competitors, array_length))
-values = np.zeros(num_competitors)
+
+matrix = np.zeros((initial_num_competitors, array_length))
+values = np.zeros(initial_num_competitors)
 
 print('initial predict ', network.predict(np.array([np.ones(input_size)])))
 
 generational_costs = []
 
-for c in range(num_competitors):
-    start = random.uniform(50, 250)
-    end = random.uniform(50, 250)
-    avg_initial = np.random.normal(0, scale=0.1)
-    spread_initial = np.random.uniform(0.2, 0.4)
+for c in range(initial_num_competitors):
+    start = random.uniform(50, 300)
+    end = random.uniform(50, 300)
+    avg_initial = np.random.normal(0, scale=0.01)
+    spread_initial = np.random.uniform(0.02, 0.03)
     matrix[c, :] = np.random.normal(avg_initial, scale=spread_initial, size=array_length)
     set_neurons_from_competitor(matrix, c)
     final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True)
@@ -144,8 +146,21 @@ for c in range(num_competitors):
     print('Competitor ', c+1, ' Cost: ', values[c])
     sleep(2)
 generational_costs.append(round(np.min(values), 2))
+
+# ------filter from initial_num_competitors to num_competitors-------
+best = []
+while len(best) < num_competitors:
+    max_index = np.argmax(values)
+    best.append(max_index)
+    values[max_index] = 0
+matrix = matrix[best]
+values = values[best]
+print('Successful transition to second stage')
+sleep(100)
+
 matrix = crossover(matrix, values, index_to_consider=0)
 matrix = mutate(matrix, prob_mutation=prob_mutation, max_mutation=max_mutation)
+# -------------------------------------------------------------------
 
 g = 0
 while (g < numruns):

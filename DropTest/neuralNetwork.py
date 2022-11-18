@@ -22,12 +22,12 @@ class Network:
             self.model.add(tf.keras.layers.Normalization(axis=-1))
             self.model.add(tf.keras.layers.Dense(
                 self.layer_sizes[0], 
-                activation='swift', 
+                activation='swish', 
                 kernel_initializer=self.initializer, 
                 name='1'))
             self.model.add(tf.keras.layers.Dense(
                 self.layer_sizes[1], 
-                activation='swift', 
+                activation='swish', 
                 kernel_initializer=self.initializer,
                 name='2'))
             self.model.add(tf.keras.layers.Dense(
