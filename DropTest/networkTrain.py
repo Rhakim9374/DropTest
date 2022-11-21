@@ -3,6 +3,7 @@ import numpy as np
 from time import sleep
 import tensorflow as tf
 from neuralNetwork import Network
+from envstate import EnvState
 from main import main
 
 # initialize neural network
@@ -112,7 +113,7 @@ def mutate(children,prob_mutation,max_mutation):
             combo[c]+= np.random.uniform(-max_mutation, max_mutation)
         if 0.01 > np.random.uniform(0, 1):
             choice = np.random.choice(np.arange(0, length), size=1)
-            combo[choice] = np.random.uniform(-1, 1)
+            combo[choice] = np.random.uniform(-1.0, 1.0)
     return temp
     
 
@@ -120,8 +121,10 @@ def mutate(children,prob_mutation,max_mutation):
 # ------------------------------------------------
 
 # initialize genetic algorithm
-initial_num_competitors = 50 # must be even (50)
-num_competitors = 20 # must be even (20)
+fake_env = EnvState()
+maxsteps = 100 / fake_env.TIMESTEP # (0.2 * max meters) / (timestep)
+initial_num_competitors = 32 # must be even (32)
+num_competitors = 16 # must be even (16)
 numruns = 100 # number of generations with constant drop (100)
 index_to_consider = 0 # must be even?
 prob_mutation = 0.05  # Percentage of nodes to get changed per generational mutation
@@ -135,26 +138,30 @@ print('initial predict ', network.predict(np.array([np.ones(input_size)])))
 generational_costs = []
 
 for c in range(initial_num_competitors):
-    start = random.uniform(50, 300)
-    end = random.uniform(50, 300)
-    avg_initial = np.random.normal(0, scale=0.01)
-    spread_initial = np.random.uniform(0.02, 0.03)
+    start = random.uniform(500, 1500)
+    end = random.uniform(500, 1500)
+    avg_initial = np.random.normal(0, scale=0.1)
+    spread_initial = np.random.uniform(0.2, 0.8)
     matrix[c, :] = np.random.normal(avg_initial, scale=spread_initial, size=array_length)
     set_neurons_from_competitor(matrix, c)
-    final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True)
+    final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True, maxsteps=maxsteps)
     values[c] = final_vel**2 + final_dist**4 + 0.1*steps
     print('Competitor ', c+1, ' Cost: ', values[c])
-    sleep(2)
+    sleep(5)
 generational_costs.append(round(np.min(values), 2))
 
 # ------filter from initial_num_competitors to num_competitors-------
 best = []
+track_values = []
+print(values)
 while len(best) < num_competitors:
-    max_index = np.argmax(values)
-    best.append(max_index)
-    values[max_index] = 0
+    min_index = np.argmin(values)
+    best.append(min_index)
+    track_values.append(values[min_index])
+    values[min_index] = 2.0*10**25
 matrix = matrix[best]
-values = values[best]
+values = np.array(track_values)
+print(values)
 print('Successful transition to second stage')
 sleep(100)
 
@@ -169,15 +176,15 @@ while (g < numruns):
     sleep(20)
     for c in range(num_competitors):
         set_neurons_from_competitor(matrix, c)
-        acc = np.zeros(10)
+        acc = np.zeros(5)
         for trial in range(len(acc)):
-            start = random.uniform(50, 250)
-            end = random.uniform(50, 250)
-            final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True)
+            start = random.uniform(500, 1500)
+            end = random.uniform(500, 1500)
+            final_vel, final_dist, steps = main(network=network,starting_altitude=start,target_altitude=end, training=True, maxsteps=maxsteps)
             acc[trial] = final_vel**2 + final_dist**4 + 0.1*steps
         values[c] = np.mean(acc)
         print('Competitor ', c+1, ' Cost: ', values[c])
-        sleep(2)
+        sleep(5)
     generational_costs.append(round(np.min(values), 2))
     matrix = crossover(matrix, values, index_to_consider=0)
     matrix = mutate(matrix, prob_mutation=prob_mutation, max_mutation=max_mutation/(np.sqrt(g+1)))

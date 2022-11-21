@@ -9,7 +9,7 @@ from computerPID import ComputerPID
 from networkComputer import NetworkComputer
 from neuralNetwork import Network
 
-def main(network, starting_altitude=100, target_altitude=0, training=False):
+def main(network, starting_altitude=100, target_altitude=0, training=False, maxsteps=300):
     starting_altitude = starting_altitude
     target_altitude = target_altitude
     print('>>> start >>>')
@@ -27,9 +27,9 @@ def main(network, starting_altitude=100, target_altitude=0, training=False):
     steps = []
 
     i = 0
-    while (altitude > 0 and len(steps)<=250):
+    while (len(steps)<=maxsteps):
         if training==True:
-            sleep(.001)
+            sleep(.002)
         else:
             sleep(mainEnvState.get_timestep())
         mainComputer.update_telemetry()

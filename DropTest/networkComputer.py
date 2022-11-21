@@ -24,7 +24,7 @@ class NetworkComputer:
     def control_throttle(self, p2=0.2, d2=0.00001):
         velocity = (self.altitudes[-4] - self.altitudes[-1]) / 3*self.TIMESTEP
         input = np.zeros(2)
-        input[0] = self.altitudes[0]
+        input[0] = self.altitudes[0] - self.TARGET_ALTITUDE
         input[1] = velocity
         input = np.array([input])
         output = self.network.predict(input)
